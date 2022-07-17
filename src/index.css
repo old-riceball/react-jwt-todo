@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.checkbox:checked {
+  @apply border-none
+}
+
+.checkbox:checked ~ .check {
+  @apply opacity-100
+}
+
+.todo__tab--active {
+  @apply border-black
+}
+
+.task__completed {
+  @apply text-opacity-30 text-gray-800/50 line-through italic
+}
