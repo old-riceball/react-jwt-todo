@@ -1,10 +1,9 @@
 
+import { useNavigate } from "react-router-dom"
 
 const useRegister = async (email, nickname, password) => {
 
-
-  
- 
+  let navigate = useNavigate()
 
   const API = "https://todoo.5xcamp.us/users"
   const body = JSON.stringify({
@@ -26,12 +25,8 @@ const useRegister = async (email, nickname, password) => {
   alert(responseJson.message + (responseJson.error ? responseJson.error : ""));
   localStorage.setItem('token', response.headers.get('Authorization'))
   localStorage.setItem('nickname', responseJson.nickname)
-
-  return (
-
-    navigate("../todo")
-
-  )
+  
+  navigate("../todo")
 }
 
 export default useRegister
