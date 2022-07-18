@@ -1,10 +1,10 @@
-import { useState } from 'React'
-import { Link } from 'react-router-dom'
-
-import useLogin from './hooks/useLogin'
+import { useState } from 'react'
+import { useNavigate, Link } from "react-router-dom"
 import useRegister from './hooks/useRegister'
 
+
 const Register = () => {
+  const navigate = useNavigate()
   const [passwordFailed, setPasswordFailed] = useState(false)
   const [input, setInput] = useState({})
 
@@ -18,20 +18,18 @@ const Register = () => {
     handleInputChange(e)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async(e) => {
     e.preventDefault()
     if (input.password !== input.passwordDoubleCheck) {
       setPasswordFailed(true)
       return
     }
-
-    useRegister(input.email, input.nickname, input.password)
+    await useRegister(input.email, input.nickname, input.password) ? navigate('/todo') : alert('not') 
   }
 
   return (
     <div className="h-full lg:flex gap-24 mx-auto">
       <div className="flex flex-col items-center">
-        <button onClick={ () => useLogin('jja@gmail.com', 'firefox')}>UseLogin</button>
         <img
           className="mb-4 block max-w-full"
           width="313"
@@ -57,7 +55,7 @@ const Register = () => {
           註冊您的代辦清單
         </h2>
         <form onSubmit={handleSubmit} className="max-w-[300px]">
-          <label name="email" className="font-medium mb-7 block">
+          <label className="font-medium mb-7 block">
             電子信箱
             <input
               onChange={handleInputChange}

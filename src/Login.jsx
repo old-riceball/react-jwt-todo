@@ -1,7 +1,9 @@
 import { useState } from 'React'
-import { Link } from 'react-router-dom'
+import { useNavigate, Link } from "react-router-dom"
+import useLogin from './hooks/useLogin'
 
 const Login = () => {
+  const navigate = useNavigate()
   const [input, setInput] = useState({})
 
   const handleInputChange = (e) => {
@@ -9,33 +11,10 @@ const Login = () => {
     setInput((prev) => { return {...prev, [name]:value}})
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    const API = "https://todoo.5xcamp.us";
-    
-    const registerBody = JSON.stringify({
-      user: {
-        email: input.email,
-        password: input.password
-      }
-    });
-    
-    const registerRequestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: registerBody,
-      redirect: "follow"
-    };
-
-    fetch(`${API}/users/sign_in`, registerRequestOptions)
-      .then(res => {
-        if (!res.ok) {throw Error(res.statusText)}
-        localStorage.setItem('login', res)
-        window.location.href= "/todo"
-      })
-      .catch(error => console.error(error))
+    await useLogin(input.email, input.password) ? navigate('/todo') : alert('not') 
   }
-
 
   return (
     <div className="h-full lg:flex gap-24 mx-auto">
