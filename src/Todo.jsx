@@ -5,32 +5,56 @@ import useGetTodo from './hooks/useGetTodo'
 import useToggleTodo from './hooks/useToggleTodo'
 import useAddTodo from './hooks/useAddTodo'
 import useRemoveTodo from './hooks/useRemoveTodo'
-import TodoList from './components/TodoList'
 
 const Todo = () => {
     const navigate = useNavigate()
-
-    const nickName = localStorage.getItem("nickname") ? localStorage.getItem("nickname") : "無登入"
+    const nickName = localStorage.getItem("nickname") || "陌生人"
     const token = localStorage.getItem('token')
-    const groupType = "全部"
-
     const [input, setInput] = useState('')
-    const [completedCount, setCompletedCount] = useState(0)
     const [tasks, setTasks] = useState([])
-
-    const [filteredTasks, setFilteredTasks] = useState(structuredClone(gg))
+    const [cloudTasks, setCloudTasks] = useState([])
     const [isLoadedTasks, setIsLoadedTasks] = useState(false)
+    const [showClearBtn, setShowClearBtn] = useState(false)
+    const [completedCount, setCompletedCount] = useState(0)
 
-    console.dir(filteredTasks);
-    
+    useEffect(() => { init() }, [])
+
     useEffect(() => {
-        init()
-    }, [])
+        console.log('tasks rendered');
+        const completedTasks = cloudTasks.filter((item) => {
+            return !item.completed_at
+        })
+        completedTasks.length > 0 ? setShowClearBtn(false) : setShowClearBtn(true)
+        setCompletedCount(completedTasks.length)
+    }, [tasks])
 
     const init = async () => {
-        const data = await useGetTodo(token)
-        setTasks(data.todos)
+        const cloudTasks = await useGetTodo(token)
+        setCloudTasks(cloudTasks.todos)
+        setTasks(cloudTasks.todos)
         setIsLoadedTasks(true)
+    }
+
+    const handleClearCompleted = async() => {
+        const newTasks = [...tasks]
+        const uncompletedTasks = newTasks.filter((item, index) => {
+            if (item.completed_at){
+                console.log(index, item.id);
+                removeTask(index, item.id)
+            }
+            return !item.completed_at
+        })
+        setTasks(uncompletedTasks)
+    }
+
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        input && addTask(input)
+        setInput('')        
+    }
+
+    const handleLogout = async() => {
+        await useLogout(localStorage.getItem('token')) ? navigate('/login') : alert('not') 
     }
 
     const toggleTask = async (index, id) => {
@@ -42,30 +66,17 @@ const Todo = () => {
 
     const removeTask = async (index, id) => {
         const newTasks = [...tasks]
-        console.log(token, id);
-        const data = await useRemoveTodo(token, id)
-
+        const response = await useRemoveTodo(token, id)
         newTasks.splice(index, 1)
         setTasks(newTasks)
     }
 
-    const addTask = (content) => {
-        setTasks([...tasks, {content}])
-        useAddTodo(token, content)
+    const addTask = async (content) => {
+        const response = await useAddTodo(token, content)
+        setTasks([...tasks, response])
     }
     
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        input && addTask(input)
-        setInput('')        
-    }
-
-    const handleLogout = async() => {
-        await useLogout(localStorage.getItem('token')) ? navigate('/login') : alert('not') 
-    }
-
     const handleGroup = (e) => {
-
         e.target.parentElement.querySelectorAll('button').forEach(item => {
             item.classList.remove('todo__tab--active')
         })
@@ -73,13 +84,22 @@ const Todo = () => {
 
         switch (e.target.innerText) {
             case "全部":
-                console.log('a');
+                setTasks(cloudTasks)
                 break
             case "待完成":
-                console.log('b');
+ 
+                const uncompletedTasks = cloudTasks.filter((item) => {
+                    return !item.completed_at
+                })
+                setTasks(uncompletedTasks)
                 break
             case "已完成":
-                console.log('c');
+
+                const completedTasks = cloudTasks.filter((item) => {
+                    return item.completed_at
+                })
+
+                setTasks(completedTasks)
                 break
         }
     }
@@ -120,7 +140,7 @@ const Todo = () => {
                     </div>
                     { !isLoadedTasks && <p className="m-8 text-lg text-center text-gray-600">歡迎登入 {nickName}，<br></br>您的個人化資料正加載中</p>}
                     <ul>
-                        {filteredTasks.map((task, index) => {
+                        {tasks.map((task, index) => {
                             return (
                             <li key={index} className="flex items-center justify-between mx-6 task group border-b-2 border-gray-100">
                                 <label htmlFor={index} className={"py-4 w-full relative flex items-center cursor-pointer " + (task.completed_at ? "task__completed" : "")}>
@@ -130,7 +150,9 @@ const Todo = () => {
                                     id={index}
                                     type="checkbox"
                                     defaultChecked={task.completed_at} />
-                                    {task.content}
+
+                                    {task.content} {task.completed_at}
+
                                     <div className="check opacity-0 absolute left-0">
                                         <svg className="mt-1.5" width="18" height="14" viewBox="0 0 18 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M17.5818 0.941981C17.0248 0.384317 16.1205 0.384668 15.5628 0.941981L6.47617 10.029L2.43754 5.99039C1.87988 5.43272 0.975914 5.43272 0.418249 5.99039C-0.139416 6.54805 -0.139416 7.45202 0.418249 8.00968L5.46631 13.0577C5.74496 13.3364 6.11035 13.4761 6.47578 13.4761C6.8412 13.4761 7.20694 13.3367 7.4856 13.0577L17.5818 2.96124C18.1394 2.40396 18.1394 1.49961 17.5818 0.941981Z" fill="#FFD370"/>
@@ -147,7 +169,7 @@ const Todo = () => {
                     </ul>
                     <div className="flex justify-between items-center px-6">
                         <p>{completedCount} 個待完成項目</p>
-                        <button disabled className="disabled:opacity-60 py-6">清除已完成項目</button>
+                        <button onClick={handleClearCompleted} disabled={showClearBtn} className="disabled:opacity-60 py-6">清除已完成項目</button>
                     </div>
                 </div>
             </div>
