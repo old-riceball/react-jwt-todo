@@ -11,7 +11,7 @@
 }
 
 .todo__tab--active {
-  @apply border-gray-600 opacity-100
+  @apply border-gray-600 text-opacity-100
 }
 
 .task__completed {
