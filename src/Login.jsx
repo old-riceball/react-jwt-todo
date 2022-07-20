@@ -15,7 +15,9 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    await useLogin(input.email, input.password) && navigate('/todo')
+    if (await useLogin(input.email, input.password)){
+      navigate('/todo') 
+    }
   }
 
   return (

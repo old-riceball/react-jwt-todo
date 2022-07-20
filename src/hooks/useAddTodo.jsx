@@ -13,7 +13,7 @@ const useAddTodo = async (token, content) => {
       },
     body
   }
-  const response = await fetch(API, requestOptions)
+  const response = await fetch(API, requestOptions).catch(error=> { toast.error(error) })
   const responseJson = await response.json()
   return responseJson
 }

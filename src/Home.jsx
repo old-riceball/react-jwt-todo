@@ -24,7 +24,7 @@ const Home = () => {
           <Link className="rounded-lg aspect-square flex-1 border-2 border-gray-600 flex justify-center items-center hover:bg-gray-800 hover:text-white " to="/login">登入帳號</Link>
           <Link className="rounded-lg aspect-square flex-1 border-2 border-gray-600 flex justify-center items-center hover:bg-gray-800 hover:text-white " to="/register">註冊帳號</Link>
          
-          { !localStorage.getItem('nickName') || <Link className="rounded-lg aspect-square flex-1 border-2 border-gray-600 flex justify-center items-center hover:bg-gray-800 hover:text-white " to="/todo">寫代辦事項</Link> }
+          { localStorage.getItem('nickname') && <Link className="rounded-lg aspect-square flex-1 border-2 border-gray-600 flex justify-center items-center hover:bg-gray-800 hover:text-white " to="/todo">寫代辦事項</Link> }
          
         </div>
       </div>

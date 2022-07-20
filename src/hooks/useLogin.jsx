@@ -12,7 +12,7 @@ const useLogin = async (email, password) => {
     headers: { 'Content-Type': 'application/json'},
     body
   }
-  const response = await fetch(API, requestOptions)
+  const response = await fetch(API, requestOptions).catch(error=> { toast.error(error) })
   const responseJson = await response.json()
 
   if (!response.ok) {
@@ -22,8 +22,8 @@ const useLogin = async (email, password) => {
 
   localStorage.setItem('token', response.headers.get('Authorization'))
   localStorage.setItem('nickname', responseJson.nickname)
-  return (toast.success(responseJson.message), true )
-  
+  toast.success(responseJson.message)
+  return (true)
 }
 
 export default useLogin

@@ -10,7 +10,7 @@ const useRemoveAllTodo = async(token, ids) => {
   const APIs = ids.map(id => 'https://todoo.5xcamp.us/todos/'+ id)
 
   Promise.all(APIs.map( async url => {
-    const response = await fetch(url, requestOptions)
+    const response = await fetch(url, requestOptions).catch(error=> { toast.error(error) })
     const responseJson = await response.json()
     console.log(response, responseJson);
   }))

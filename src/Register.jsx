@@ -25,9 +25,9 @@ const Register = () => {
       setPasswordFailed(true)
       return
     }
-    if (await useRegister(input.email, input.nickname, input.password)){
+    if (await useRegister(input.email, input.nickname, input.password))
+    {
       navigate('/todo') 
-      console.log(input);
     }
   }
 

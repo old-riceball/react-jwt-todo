@@ -9,7 +9,7 @@ const useLogout = async (token) => {
        'Authorization': token
       },
   }
-  const response = await fetch(API, requestOptions)
+  const response = await fetch(API, requestOptions).catch(error=> { toast.error(error) })
   const responseJson = await response.json()
   
   if (!response.ok) {
