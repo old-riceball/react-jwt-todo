@@ -1,5 +1,4 @@
-// 不希望在切換 Tab 的時候還要去 fetch 資料，因此除了 Tasks 外還設置了 cloudTasks 來紀錄雲端上應有的資料(也就是目前全部資料)。
-
+// Hooks
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import useLogout from './hooks/useLogout'
@@ -8,7 +7,9 @@ import useToggleTodo from './hooks/useToggleTodo'
 import useAddTodo from './hooks/useAddTodo'
 import useRemoveTodo from './hooks/useRemoveTodo'
 import useRemoveAllTodo from './hooks/useRemoveAllTodo'
+// Images
 import writer from './assets/writer.png'
+import logo from './assets/logo_lg.svg'
 
 const Todo = () => {
     const navigate = useNavigate()
@@ -16,26 +17,13 @@ const Todo = () => {
     const token = localStorage.getItem('token')
     const tasksTab = document.querySelector('[data-todo-tab]')
     const [input, setInput] = useState('')
+    // 不希望在切換 Tab 的時候還要去 fetch 資料，因此除了 Tasks 外還設置了 cloudTasks 來紀錄雲端上應有的資料(也就是目前全部資料)。
     const [tasks, setTasks] = useState([])
     const [cloudTasks, setCloudTasks] = useState([])
     const [isLoadedTasks, setIsLoadedTasks] = useState(false)
     const [showClearBtn, setShowClearBtn] = useState(false)
     const [completedCount, setCompletedCount] = useState(0)
     const [activeTab, setActiveTab] = useState('')
-
-
-    useEffect(() => { init() }, [])
-
-    useEffect(() => {
-        async () => {
-            setCloudTasks(await useGetTodo(token))
-        }
-        const completedTasks = tasks.filter((item) => {
-            return !item.completed_at
-        })
-        completedTasks.length > 0 ? setShowClearBtn(false) : setShowClearBtn(true)
-        setCompletedCount(completedTasks.length)
-    }, [tasks])
 
     const init = async () => {
         const cloudTasks = await useGetTodo(token)
@@ -54,11 +42,8 @@ const Todo = () => {
         })
         useRemoveAllTodo(token, ids)
 
-        
-
         setCloudTasks(newCloudTasks)
         setTasks(newCloudTasks)
-
     }
 
     const handleSubmit = (e) => {
@@ -68,15 +53,14 @@ const Todo = () => {
     }
 
     const handleLogout = async() => {
-        await useLogout(localStorage.getItem('token')) ? navigate('/login') : alert('not') 
+        await useLogout(localStorage.getItem('token')) && navigate('/login')
     }
 
     const toggleTask = async (index, id) => {
         const newTasks = [...tasks]
-        const data = await useToggleTodo(token, id)
-        newTasks[index].completed_at = data.completed_at
+        const response = await useToggleTodo(token, id)
+        newTasks[index].completed_at = response.completed_at
         setTasks(newTasks)
-        setCloudTasks(newTasks)
     }
 
     const removeTask = async (index, id) => {
@@ -146,25 +130,43 @@ const Todo = () => {
         setTasks(cloudTasks)
     }
 
+    // First render init
+    useEffect(() => { init() }, [])
+
+    // When tasks changed
+    useEffect(() => {
+        const unCompletedTasks = tasks.filter((item) => {
+            return !item.completed_at
+        })
+        const completedTasks = tasks.length - unCompletedTasks.length
+
+        // Toggle clearBtn disable
+        completedTasks > 0 ? setShowClearBtn(false) : setShowClearBtn(true)
+        // Display unCompletedTasks
+        setCompletedCount(unCompletedTasks.length)
+        // At "已完成" group show completedCloudTasks 
+        if(activeTab === "已完成") {
+            const completedCloudTasks = cloudTasks.filter((item) => {
+                return !item.completed_at
+            })
+            setCompletedCount(completedCloudTasks.length)
+        }
+    }, [tasks])
+
     return (
-        <>
+        <div className="w-full before:content-[''] before:fixed before:top-0 before:left-0 before:w-full before:h-full before:bg-transparent md:before:bg-white before:clip-path-slash">
             <nav className="fixed top-0 left-0 w-full">
                 <div className="flex mx-9 mt-4 justify-between items-center">
                     <Link to="/">
-                        <img
-                            width="313"
-                            height="47"
-                            src="https://res.cloudinary.com/thegroup/image/upload/v1657854080/codepen/HexSchool%20-%20online%20todo-list%20react/logo_lg.svg"
-                            alt="Online todo list logo"
-                            />
+                    <img width="313" height="47" src={logo} alt="Online todo list logo" />
                     </Link>
-                    <div className="flex whitespace-nowrap">
+                    <div className="flex items-center whitespace-nowrap">
                         <p className="hidden sm:block font-bold text-xl px-3">{nickName} 的代辦事項</p>
                         <a onClick={handleLogout} className="px-3 cursor-pointer">登出</a>
                     </div>
                 </div>
             </nav>
-            <div className="w-full max-w-[500px]">
+            <div className="w-full max-w-[500px] mx-auto z-10 relative">
                 <form onSubmit={handleSubmit} className="flex items-center bg-white shadow-md rounded-lg mb-4">
                     <input onChange={e => setInput(e.target.value)} className="w-full px-4 py-3 rounded-lg outline-none" type="text" placeholder="新增待辦事項" value={input} required />
                     <button className="mx-1 bg-gray-700 w-10 aspect-square rounded-lg  right-0 relative">
@@ -175,41 +177,43 @@ const Todo = () => {
                 </form>
 
                 <div className="shadow-md bg-white rounded-lg">
-                    <div className="fixed bottom-0 right-0">
+
+                    {/* For state tasks / cloudTasks Debug */}
+                    {/* <div className="fixed bottom-0 right-0">
                         <div className="bg-red-300 p-8">
                             <h2 className="font-bold text-lg">Tasks</h2>
-                            {tasks.map(task => {
-                                
-                                    return(
-                                    <ul>
-                                        <li>
-                                            {task.content} - {task.completed_at}
-                                        </li>
-                                    </ul>)
-                                
+                            <ul>
+                            { tasks.map((task, index) => {
+                                return(
+                                    <li key={index}>
+                                        {task.content} - {task.completed_at}
+                                    </li>
+                                )
                             })}
+                            </ul>
                         </div>
                         <div className="bg-blue-300 p-8">
                             <h2 className="font-bold text-lg">CloudTasks</h2>
-                            {cloudTasks.map(task => {
+                            <ul>
+
+                            { cloudTasks.map((task, index) => {
                                 return(
-                                <ul>
-                                    <li>
+                                    <li key={index}>
                                         {task.content} - {task.completed_at}
                                     </li>
-                                </ul>)
+                                )
                             })}
+                            </ul>
                         </div>
-                    </div>
-
+                    </div> */}
 
                     <div data-todo-tab onClick={handleTabs} className="flex">
-                        <button data-tab-all className="flex-1 text-gray-800 text-opacity-40 font-bold py-4 border-gray-800 border-opacity-10 border-b-2 todo__tab--active tracking-widest">全部</button>
-                        <button className="flex-1 text-gray-800 text-opacity-40 font-bold py-4 border-b-2 border-gray-800 border-opacity-10 tracking-widest">待完成</button>
-                        <button className="flex-1 text-gray-800 text-opacity-40 font-bold py-4 border-b-2 border-gray-800 border-opacity-10 tracking-widest">已完成</button>
+                        <button data-tab-all className="flex-1 text-gray-800 text-opacity-40 font-bold py-4 border-gray-800 border-opacity-10 border-b todo__tab--active tracking-widest">全部</button>
+                        <button className="flex-1 text-gray-800 text-opacity-40 font-bold py-4 border-b border-gray-800 border-opacity-10 tracking-widest">待完成</button>
+                        <button className="flex-1 text-gray-800 text-opacity-40 font-bold py-4 border-b border-gray-800 border-opacity-10 tracking-widest">已完成</button>
                     </div>
 
-                    <div className="border-b-2 border-gray-800 border-opacity-10">
+                    <div className="border-b border-gray-800 border-opacity-10">
                         { !isLoadedTasks && <p className="m-8 text-lg text-center text-gray-600">歡迎登入 {nickName}，<br></br>您的個人資料正加載中……</p>}
     
                         { !tasks.length && isLoadedTasks ? 
@@ -231,8 +235,7 @@ const Todo = () => {
                                     className="checkbox appearance-none w-5 h-5 rounded mr-4 border-2 border-gray-300 cursor-pointer"
                                     id={index}
                                     type="checkbox"
-                                    // defaultChecked={task.completed_at} // 詭異的屬性，讓我卡好久 QQ https://blog.csdn.net/TL18382950497/article/details/115425569
-                                    // checked={task.completed_at}
+                                    checked={task.completed_at ? true : false}
                                     />
 
                                     {task.content}
@@ -257,7 +260,7 @@ const Todo = () => {
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     )
 }
 export default Todo

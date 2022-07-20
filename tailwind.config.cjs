@@ -5,6 +5,9 @@ module.exports = {
     "./src/**/*.{jsx,js}"
   ],
   theme: {
+    fontFamily: {
+      'sans': ["-apple-system","BlinkMacSystemFont","Segoe UI","Roboto","Helvetica Neue","Arial","Noto Sans","sans-serif","Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji"]
+    },
     extend: {
       colors: {
         primary: '#FFD370',

@@ -1,6 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@layer utilities {
+  .clip-path-slash {
+    clip-path: polygon(0 65%, 100% 45%, 100% 100%, 0% 100%);
+  }
+}
 
 .checkbox:checked {
   @apply border-none
@@ -11,7 +16,7 @@
 }
 
 .todo__tab--active {
-  @apply border-gray-600 text-opacity-100
+  @apply border-gray-600 text-opacity-100 border-b-2
 }
 
 .task__completed {

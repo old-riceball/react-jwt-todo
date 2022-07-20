@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, Link } from "react-router-dom"
 import useRegister from './hooks/useRegister'
-
+import boardMan from './assets/board-man-01.png'
+import logo from './assets/logo_lg.svg'
 
 const Register = () => {
   const navigate = useNavigate()
@@ -24,30 +25,26 @@ const Register = () => {
       setPasswordFailed(true)
       return
     }
-    await useRegister(input.email, input.nickname, input.password) ? navigate('/todo') : alert('not') 
+    if (await useRegister(input.email, input.nickname, input.password)){
+      navigate('/todo') 
+      console.log(input);
+    }
   }
 
   return (
     <div className="h-full lg:flex gap-24 mx-auto">
       <div className="flex flex-col items-center">
-        <img
-          className="mb-4 block max-w-full"
-          width="313"
-          height="47"
-          src="https://res.cloudinary.com/thegroup/image/upload/v1657854080/codepen/HexSchool%20-%20online%20todo-list%20react/logo_lg.svg"
-          alt="Online todo list logo"
-        />
+      <img className="mb-4" width="313" height="47" src={logo} alt="Online todo list logo" />
         <picture>
           <source
             media="(min-width: 1024px)"
-            srcSet="https://res.cloudinary.com/thegroup/image/upload/v1657854080/codepen/HexSchool%20-%20online%20todo-list%20react/board-man-02.png"
+            srcSet={boardMan}
           />
           <source
             media="(max-width: 1024px)"
-            srcSet="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8/5+hHgAHggJ/PchI7wAAAABJRU5ErkJggg=="
-            sizes="100%"
+            srcSet="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
           />
-          <img src="***url of image***" alt="一個人拿著鉛筆準備完成代辦事項" />
+          <img className="hidden lg:block" width="386" height="386" src={boardMan} alt="一個人拿著鉛筆準備完成代辦事項" />
         </picture>
       </div>
       <div>

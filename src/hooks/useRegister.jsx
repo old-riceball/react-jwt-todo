@@ -1,3 +1,5 @@
+import toast from "react-hot-toast"
+
 const useRegister = async (email, nickname, password) => {
   const API = "https://todoo.5xcamp.us/users"
   const body = JSON.stringify({
@@ -15,13 +17,17 @@ const useRegister = async (email, nickname, password) => {
   const response = await fetch(API, requestOptions)
   const responseJson = await response.json()
 
-  alert(responseJson.message + (responseJson.error ? responseJson.error : ""));
-
-  if (!response.ok) { return false }
-
+  if (!response.ok) {
+    toast.error(responseJson.message + responseJson.error)
+    return false
+  }
+  
   localStorage.setItem('token', response.headers.get('Authorization'))
   localStorage.setItem('nickname', responseJson.nickname)
-  return true
+  return (
+    toast.success(responseJson.message),
+    true
+    )
 }
 
 export default useRegister

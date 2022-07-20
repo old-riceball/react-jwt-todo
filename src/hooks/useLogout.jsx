@@ -1,3 +1,5 @@
+import toast from 'react-hot-toast'
+
 const useLogout = async (token) => {
   const API = "https://todoo.5xcamp.us/users/sign_out"
   const requestOptions = {
@@ -9,10 +11,13 @@ const useLogout = async (token) => {
   }
   const response = await fetch(API, requestOptions)
   const responseJson = await response.json()
-  alert(responseJson.message);
-  if (!response.ok) { return false }
+  
+  if (!response.ok) {
+    toast.error(responseJson.message)
+    return (false)
+  }
   localStorage.clear()
-  return true
+  return (toast.success(responseJson.message), true)
 }
 
 export default useLogout
