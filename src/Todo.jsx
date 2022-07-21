@@ -235,7 +235,7 @@ const Todo = () => {
                                     className="checkbox appearance-none w-5 h-5 rounded mr-4 border-2 border-gray-300 cursor-pointer"
                                     id={index}
                                     type="checkbox"
-                                    checked={task.completed_at ? true : false}
+                                    checked={!!task.completed_at}
                                     />
 
                                     {task.content}
