@@ -23,7 +23,7 @@ const useLogin = async (email, password) => {
   localStorage.setItem('token', response.headers.get('Authorization'))
   localStorage.setItem('nickname', responseJson.nickname)
   toast.success(responseJson.message)
-  return (true)
+  return true
 }
 
 export default useLogin

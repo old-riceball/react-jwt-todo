@@ -7,8 +7,6 @@ import Todo from './Todo'
 import ProtectedRoute from './ProtectedRoute'
 import toast, { Toaster } from 'react-hot-toast';
 
-const isLoggin = localStorage.getItem('token')
-
 function App() {
   return (
     <div className="min-h-screen bg-primary flex justify-center items-center px-4">
@@ -19,7 +17,7 @@ function App() {
           <Route path="/register" element={<Register />}/>
           <Route path="/login" element={<Login />}/>
           <Route path="/todo" element={
-            <ProtectedRoute isLoggin={isLoggin}>
+            <ProtectedRoute>
               <Todo />
             </ProtectedRoute>
           }/>
